@@ -1,13 +1,16 @@
 import express from "express";
-import dotenv from "dotenv/config";
+import "dotenv/config";
 import solarUnitRouter from "./api/solar-unit.js";
 import { connectDB } from "./infrastructure/db.js";
+import energyGenerationRecordRouter from "./api/energy-generation-record.js";
+
 
 
 const server = express();
 server.use(express.json());
 
 server.use("/api/solar-units", solarUnitRouter);
+server.use("/api/energy-generation-records", energyGenerationRecordRouter);
 
 
 // Connect to MongoDB before starting the server

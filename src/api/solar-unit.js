@@ -10,7 +10,11 @@ import {
 const solarUnitRouter = express.Router();
 
 solarUnitRouter.route("/").get(getAllSolarUnits).post(createSolarUnit);
-solarUnitRouter.route("/:id").get(getSolarUnitById).put(updateSolarUnit).delete(deleteSolarUnit);
+solarUnitRouter
+.route("/:id")
+.get(getSolarUnitById)
+.put(updateSolarUnit)
+.delete(deleteSolarUnit);
 
 
 export default solarUnitRouter;
