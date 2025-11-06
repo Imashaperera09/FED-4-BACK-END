@@ -1,3 +1,4 @@
+import { da } from "zod/v4/locales";
 import { EnergyGenerationRecord } from "../infrastructure/entities/EnergyGenerationRecord";
 import { NextFunction, Request, Response } from "express";
 
@@ -7,10 +8,35 @@ export const getAllEnergyGenerationRecordsBySolarUnitId = async (
   next: NextFunction
 ) => {
   try {
-    const energyGenerationRecords = await EnergyGenerationRecord.find({
-      solarUnitId: req.params.id,
-    });
+
+    const { id } = req.params;
+    const { groupBy } = req.query;
+
+    if (!groupBy) {
+      const energyGenerationRecords = await EnergyGenerationRecord.find({
+        solarUnitId: id,
+      }).sort({ timestamp: -1 });
+      return res.status(200).json(energyGenerationRecords);
+    }
+
+    if (groupBy === "date") {
+      const energyGenerationRecords = await EnergyGenerationRecord.aggregate([{
+        $group: {
+        _id: {
+          date: {
+            $dateToString: {format : "%Y-%m-%d", date: "$timestamp" }
+          },
+        },
+        totalEnergyGenerated: { $sum: "$energyGenerated" },
+        },
+      },
+      {
+        $sort: { "_id.date": 1 },
+      }
+    ]);
     res.status(200).json(energyGenerationRecords);
+    }
+
   } catch (error) {
     next(error);
   }
