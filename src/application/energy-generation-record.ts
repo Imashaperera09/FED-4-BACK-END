@@ -31,7 +31,7 @@ export const getAllEnergyGenerationRecordsBySolarUnitId = async (
         },
       },
       {
-        $sort: { "_id.date": 1 },
+        $sort: { "_id.date": -1 },
       }
     ]);
     res.status(200).json(energyGenerationRecords);
