@@ -6,6 +6,7 @@ import { loggerMiddleware } from "./api/middlewares/logger-middleware";
 import solarUnitRouter from "./api/solar-unit";
 import { connectDB } from "./infrastructure/db";
 import cors from "cors";
+import webhooksRouter from "./api/webhooks";
 
 const server = express();
 server.use(express.json());
@@ -15,6 +16,7 @@ server.use(loggerMiddleware);
 
 server.use("/api/solar-units", solarUnitRouter);
 server.use("/api/energy-generation-records", energyGenerationRecordRouter);
+server.use("/api/webhooks", webhooksRouter);
 
 server.use(globalErrorHandler);
 
