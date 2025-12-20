@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CreateSolarUnitDto } from "../domain/dtos/solar-unit";
 import { SolarUnit } from "../infrastructure/entities/SolarUnit";
+import { User } from "../infrastructure/entities/User";
 import { NextFunction, Request, Response } from "express";
 import { NotFoundError, ValidationError } from "../domain/errors/errors";
 
@@ -108,6 +109,31 @@ export const deleteSolarUnit = async (
 
     await SolarUnit.findByIdAndDelete(id);
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSolarUnitByClerkUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { clerkUserId } = req.params;
+    console.log("Looking up user with clerkUserId:", clerkUserId);
+    const user = await User.findOne({ clerkUserId });
+
+    if (!user) {
+      console.log("User not found for clerkUserId:", clerkUserId);
+      throw new NotFoundError("User not found");
+    }
+    const solarUnits = await SolarUnit.find({ userId: user._id });
+    if (!solarUnits.length) {
+      console.log("No solar units found for user:", user._id);
+      return res.status(200).json(null); // Return null if no solar units found
+    }
+    res.status(200).json(solarUnits[0]); // Return only the first solar unit
   } catch (error) {
     next(error);
   }

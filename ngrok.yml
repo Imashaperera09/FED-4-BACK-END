@@ -6,4 +6,4 @@ endpoints:
   - name: api
     url: lactescent-unmunicipalized-artie.ngrok-free.dev
     upstream:
-      url: http://localhost:8080
+      url: http://localhost:8000

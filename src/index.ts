@@ -11,7 +11,6 @@ import webhooksRouter from "./api/webhooks";
 const server = express();
 
 server.use(cors({ origin: "http://localhost:5173" }));
-
 server.use(loggerMiddleware);
 
 server.use("/api/webhooks", webhooksRouter);
