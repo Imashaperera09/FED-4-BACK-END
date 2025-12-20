@@ -53,23 +53,25 @@ export const createSolarUnit = async (
   }
 };
 
-export const getSolarUnitById = async (
+export const getSolarUnitsByClerkUserId = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
-    const solarUnit = await SolarUnit.findById(id);
+    const { clerkUserId } = req.params;
+    const solarUnits = await SolarUnit.find({ userId: clerkUserId });
 
-    if (!solarUnit) {
-      throw new NotFoundError("Solar unit not found");
+    if (!solarUnits.length) {
+      throw new NotFoundError("Solar units not found");
     }
-    res.status(200).json(solarUnit);
+
+    res.status(200).json(solarUnits);
   } catch (error) {
     next(error);
   }
 };
+
 
 export const updateSolarUnit = async (
   req: Request,
