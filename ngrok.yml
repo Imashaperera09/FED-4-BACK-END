@@ -3,8 +3,7 @@ agent:
   authtoken: 36z2ofTq7OFnNjZJCyDTt9kWUKD_4Jzwv2Qkftc88XeZecVx1
 
 endpoints:
-  - name: back-end
-    type: http
-    domain: lactescent-unmunicipalized-artie.ngrok-free.dev
+  - name: api
+    url: lactescent-unmunicipalized-artie.ngrok-free.dev
     upstream:
       url: http://localhost:8080
