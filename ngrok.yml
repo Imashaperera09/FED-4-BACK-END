@@ -1,12 +1,10 @@
 version: 3
 agent:
-  # Set your token in an env var NGROK_AUTHTOKEN or paste it here
-  authtoken: ${36z2ofTq7OFnNjZJCyDTt9kWUKD_4Jzwv2Qkftc88XeZecVx1}
+  authtoken: 36z2ofTq7OFnNjZJCyDTt9kWUKD_4Jzwv2Qkftc88XeZecVx1
 
 endpoints:
   - name: back-end
-      url: https://lactescent-unmunicipalized-artie.ngrok-free.dev/
-
-  
+    type: http
+    domain: lactescent-unmunicipalized-artie.ngrok-free.dev
     upstream:
-      url: http://localhost:8000
+      url: http://localhost:8080
