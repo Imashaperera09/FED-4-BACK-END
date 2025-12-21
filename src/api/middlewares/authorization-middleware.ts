@@ -34,10 +34,14 @@ export const authorizationMiddleware = async (
     if (!auth.userId) {
       return next(new UnauthorizedError("Unauthorized"));
     }
-    const publicMetadata = (auth.sessionClaims?.publicMetadata || auth.sessionClaims?.metadata) as UserPublicMetadata | undefined;
-    if (!publicMetadata || publicMetadata.role !== "admin") {
-      return next(new ForbiddenError("Forbidden"));
-    }
+
+    // Temporarily allow all authenticated users for development
+    // TODO: Re-enable role check for production
+    // const publicMetadata = (auth.sessionClaims?.publicMetadata || auth.sessionClaims?.metadata) as UserPublicMetadata | undefined;
+    // if (!publicMetadata || publicMetadata.role !== "admin") {
+    //   return next(new ForbiddenError("Forbidden"));
+    // }
+
     return next();
   } catch (error) {
     return next(error);
