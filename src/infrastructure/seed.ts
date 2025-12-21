@@ -17,16 +17,8 @@ async function seed() {
     await SolarUnit.deleteMany({});
     await User.deleteMany({});
 
-    // Create a new user
-    const user = await User.create({
-      name: "Alice Example",
-      email: "alice@example.com", 
-      clerkUserId: "clerk_user_123",
-    });
-
     // Create a new solar unit linked to the user
-    const solarUnit = await SolarUnit.create({
-      userId: user._id,
+     const solarUnit = await SolarUnit.create({
       serialNumber: "SU-0001",
       installationDate: new Date("2025-08-01"),
       capacity: 5000,
