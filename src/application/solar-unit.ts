@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { CreateSolarUnitDto } from "../domain/dtos/solar-unit";
+import { CreateSolarUnitDto, UpdateSolarUnitDto } from "../domain/dtos/solar-unit";
 import { SolarUnit } from "../infrastructure/entities/SolarUnit";
-import { User } from "../infrastructure/entities/User";
 import { NextFunction, Request, Response } from "express";
 import { NotFoundError, ValidationError } from "../domain/errors/errors";
+import { User } from "../infrastructure/entities/User";
+import { getAuth } from "@clerk/express";
 
 export const getAllSolarUnits = async (
   req: Request,
@@ -43,7 +44,6 @@ export const createSolarUnit = async (
       installationDate: new Date(data.installationDate),
       capacity: data.capacity,
       status: data.status,
-      userId: data.userId,
     };
 
     const createdSolarUnit = await SolarUnit.create(newSolarUnit);
@@ -53,25 +53,56 @@ export const createSolarUnit = async (
   }
 };
 
-export const getSolarUnitsByClerkUserId = async (
+export const getSolarUnitById = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { clerkUserId } = req.params;
-    const solarUnits = await SolarUnit.find({ userId: clerkUserId });
+    const { id } = req.params;
+    const solarUnit = await SolarUnit.findById(id);
 
-    if (!solarUnits.length) {
-      throw new NotFoundError("Solar units not found");
+    if (!solarUnit) {
+      throw new NotFoundError("Solar unit not found");
     }
-
-    res.status(200).json(solarUnits);
+    res.status(200).json(solarUnit);
   } catch (error) {
     next(error);
   }
 };
 
+export const getSolarUnitForUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const auth = getAuth(req);
+    const clerkUserId = auth.userId;
+
+    const user = await User.findOne({ clerkUserId });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const solarUnits = await SolarUnit.find({ userId: user._id });
+    res.status(200).json(solarUnits[0]);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSolarUnitValidator = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const result = UpdateSolarUnitDto.safeParse(req.body);
+  if (!result.success) {
+    throw new ValidationError(result.error.message);
+  }
+  next();
+};
 
 export const updateSolarUnit = async (
   req: Request,
@@ -79,7 +110,7 @@ export const updateSolarUnit = async (
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const { serialNumber, installationDate, capacity, status } = req.body;
+  const { serialNumber, installationDate, capacity, status, userId } = req.body;
   const solarUnit = await SolarUnit.findById(id);
 
   if (!solarUnit) {
@@ -91,6 +122,7 @@ export const updateSolarUnit = async (
     installationDate,
     capacity,
     status,
+    userId,
   });
 
   res.status(200).json(updatedSolarUnit);
@@ -111,31 +143,6 @@ export const deleteSolarUnit = async (
 
     await SolarUnit.findByIdAndDelete(id);
     res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getSolarUnitByClerkUserId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { clerkUserId } = req.params;
-    console.log("Looking up user with clerkUserId:", clerkUserId);
-    const user = await User.findOne({ clerkUserId });
-
-    if (!user) {
-      console.log("User not found for clerkUserId:", clerkUserId);
-      throw new NotFoundError("User not found");
-    }
-    const solarUnits = await SolarUnit.find({ userId: user._id });
-    if (!solarUnits.length) {
-      console.log("No solar units found for user:", user._id);
-      return res.status(200).json(null); // Return null if no solar units found
-    }
-    res.status(200).json(solarUnits[0]); // Return only the first solar unit
   } catch (error) {
     next(error);
   }

@@ -2,21 +2,23 @@ import express from "express";
 import {
   getAllSolarUnits,
   createSolarUnit,
+  getSolarUnitById,
   updateSolarUnit,
   deleteSolarUnit,
   createSolarUnitValidator,
-  getSolarUnitByClerkUserId,
+  getSolarUnitForUser,
 } from "../application/solar-unit";
+import { authenticationMiddleware } from "./middlewares/authentication-middleware";
+import { authorizationMiddleware } from "./middlewares/authorization-middleware";
 
 const solarUnitRouter = express.Router();
 
-solarUnitRouter.route("/").get(getAllSolarUnits).post(createSolarUnitValidator, createSolarUnit);
+solarUnitRouter.route("/").get(authenticationMiddleware, authorizationMiddleware, getAllSolarUnits).post(authenticationMiddleware, authorizationMiddleware, createSolarUnitValidator, createSolarUnit);
+solarUnitRouter.route("/me").get(authenticationMiddleware, getSolarUnitForUser);
 solarUnitRouter
   .route("/:id")
-  .put(updateSolarUnit)
-  .delete(deleteSolarUnit);
-
-// Route for getting solar unit(s) by Clerk user ID
-solarUnitRouter.route("/user/:clerkUserId").get(getSolarUnitByClerkUserId);
+  .get(authenticationMiddleware, authorizationMiddleware, getSolarUnitById)
+  .put(authenticationMiddleware, authorizationMiddleware, updateSolarUnit)
+  .delete(authenticationMiddleware, authorizationMiddleware, deleteSolarUnit);
 
 export default solarUnitRouter;
