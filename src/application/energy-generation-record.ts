@@ -1,7 +1,7 @@
 import { da } from "zod/v4/locales";
 import { EnergyGenerationRecord } from "../infrastructure/entities/EnergyGenerationRecord";
 import { NextFunction, Request, Response } from "express";
-
+import { ValidationError } from "../domain/errors/errors";
 export const getAllEnergyGenerationRecordsBySolarUnitId = async (
   req: Request,
   res: Response,
