@@ -7,6 +7,7 @@ import {
   deleteSolarUnit,
   createSolarUnitValidator,
   getSolarUnitForUser,
+  updateSolarUnitValidator,
 } from "../application/solar-unit";
 import { authenticationMiddleware } from "./middlewares/authentication-middleware";
 import { authorizationMiddleware } from "./middlewares/authorization-middleware";
@@ -18,7 +19,7 @@ solarUnitRouter.route("/me").get(getSolarUnitForUser);
 solarUnitRouter
   .route("/:id")
   .get(getSolarUnitById)
-  .put(updateSolarUnit)
+  .put(updateSolarUnitValidator, updateSolarUnit)
   .delete(deleteSolarUnit);
 
 export default solarUnitRouter;

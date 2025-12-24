@@ -109,23 +109,31 @@ export const updateSolarUnit = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { id } = req.params;
-  const { serialNumber, installationDate, capacity, status, userId } = req.body;
-  const solarUnit = await SolarUnit.findById(id);
+  try {
+    const { id } = req.params;
+    const { serialNumber, installationDate, capacity, status, userId } = req.body;
+    const solarUnit = await SolarUnit.findById(id);
 
-  if (!solarUnit) {
-    throw new NotFoundError("Solar unit not found");
+    if (!solarUnit) {
+      throw new NotFoundError("Solar unit not found");
+    }
+
+    const updatedSolarUnit = await SolarUnit.findByIdAndUpdate(
+      id,
+      {
+        serialNumber,
+        installationDate: new Date(installationDate),
+        capacity,
+        status,
+        userId: userId || null,
+      },
+      { new: true }
+    );
+
+    res.status(200).json(updatedSolarUnit);
+  } catch (error) {
+    next(error);
   }
-
-  const updatedSolarUnit = await SolarUnit.findByIdAndUpdate(id, {
-    serialNumber,
-    installationDate,
-    capacity,
-    status,
-    userId,
-  });
-
-  res.status(200).json(updatedSolarUnit);
 };
 
 export const deleteSolarUnit = async (
