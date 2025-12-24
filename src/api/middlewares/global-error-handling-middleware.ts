@@ -6,7 +6,12 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(err);
+  console.error("=== ERROR CAUGHT ===");
+  console.error("Error name:", err.name);
+  console.error("Error message:", err.message);
+  console.error("Error stack:", err.stack);
+  console.error("==================");
+
   if (err.name === "NotFoundError") {
     return res.status(404).json({ message: err.message });
   }
@@ -20,5 +25,5 @@ export const globalErrorHandler = (
   }
 
   // Handle other errors
-  res.status(500).json({ message: "Internal server error" });
+  res.status(500).json({ message: "Internal server error", error: err.message });
 };
