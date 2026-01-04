@@ -9,6 +9,9 @@ import cors from "cors";
 import webhooksRouter from "./api/webhooks";
 import usersRouter from "./api/users";
 import weatherRouter from "./api/weather";
+import { invoiceRouter } from "./api/invoice";
+import { initInvoiceScheduler } from "./jobs/invoice-scheduler";
+
 const server = express();
 
 server.use(cors({ origin: "http://localhost:5173" }));
@@ -22,7 +25,11 @@ server.use("/api/solar-units", solarUnitRouter);
 server.use("/api/energy-generation-records", energyGenerationRecordRouter);
 server.use("/api/users", usersRouter);
 server.use("/api/weather", weatherRouter);
+server.use("/api/invoices", invoiceRouter);
 server.use(globalErrorHandler);
+
+// Initialize automated jobs
+initInvoiceScheduler();
 
 connectDB();
 

@@ -23,6 +23,10 @@ const solarUnitSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['ACTIVE', 'INACTIVE', 'MAINTENANCE']
+  },
+  lastInvoiceDate: {
+    type: Date,
+    required: false
   }
 }, {
   timestamps: true // This adds createdAt and updatedAt fields
