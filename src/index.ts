@@ -38,6 +38,8 @@ server.post(
 
 server.use(express.json());
 
+import settingsRouter from "./api/settings";
+
 server.use("/api/solar-units", solarUnitRouter);
 server.use("/api/energy-generation-records", energyGenerationRecordRouter);
 server.use("/api/users", usersRouter);
@@ -45,6 +47,7 @@ server.use("/api/weather", weatherRouter);
 server.use("/api/invoices", invoiceRouter);
 server.use("/api/payments", paymentRouter);
 server.use("/api/anomalies", anomalyRouter);
+server.use("/api/settings", settingsRouter);
 
 server.use(globalErrorHandler);
 
