@@ -16,7 +16,15 @@ anomalyRouter.get("/", async (req: Request, res: Response, next: NextFunction) =
         if (severity) filter.severity = severity;
         if (status) filter.status = status;
 
-        const anomalies = await Anomaly.find(filter).populate('solarUnitId').sort({ timestamp: -1 });
+        const anomalies = await Anomaly.find(filter)
+            .populate({
+                path: 'solarUnitId',
+                populate: {
+                    path: 'userId',
+                    model: 'User'
+                }
+            })
+            .sort({ timestamp: -1 });
         res.status(200).json(anomalies);
     } catch (error) {
         next(error);

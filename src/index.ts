@@ -16,6 +16,7 @@ import { initAnomalyDetectionJob } from "./jobs/anomaly-detection-job";
 
 import { handleStripeWebhook } from "./application/payment";
 import paymentRouter from "./api/payment";
+import anomalyRouter from "./api/anomaly";
 
 
 import { clerkMiddleware } from "@clerk/express";
@@ -43,6 +44,7 @@ server.use("/api/users", usersRouter);
 server.use("/api/weather", weatherRouter);
 server.use("/api/invoices", invoiceRouter);
 server.use("/api/payments", paymentRouter);
+server.use("/api/anomalies", anomalyRouter);
 
 server.use(globalErrorHandler);
 
