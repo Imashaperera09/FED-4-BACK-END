@@ -4,9 +4,7 @@ import { Request, Response } from "express";
 import { Invoice } from "../infrastructure/entities/Invoice";
 import { NotFoundError, ValidationError } from "../domain/errors/errors";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: "2025-01-27.acacia", // Using latest API version or default
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 export const createCheckoutSession = async (req: Request, res: Response) => {
     // 1. Get invoice
@@ -38,7 +36,7 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
     });
 
     // 3. Return client secret to frontend
-    res.json({ clientSecret: session.client_secret });
+    return res.json({ clientSecret: session.client_secret });
 };
 
 export const getSessionStatus = async (req: Request, res: Response) => {
@@ -48,9 +46,9 @@ export const getSessionStatus = async (req: Request, res: Response) => {
         throw new ValidationError("Session ID is required");
     }
 
-    const session = await stripe.checkout.sessions.retrieve(session_id);
+    const session: any = await stripe.checkout.sessions.retrieve(session_id);
 
-    res.json({
+    return res.json({
         status: session.status,
         paymentStatus: session.payment_status,
         amountTotal: session.amount_total,
@@ -89,5 +87,5 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     }
 
     // 3. Always return 200 to acknowledge receipt
-    res.status(200).json({ received: true });
+    return res.status(200).json({ received: true });
 };

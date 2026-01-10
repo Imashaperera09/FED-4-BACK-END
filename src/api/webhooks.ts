@@ -92,7 +92,7 @@ webhooksRouter.post(
         console.log(`Unhandled event type ${event.type}`);
     }
 
-    res.send();
+    return res.send();
   }
 );
 

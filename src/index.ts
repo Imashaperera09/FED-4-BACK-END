@@ -11,14 +11,20 @@ import usersRouter from "./api/users";
 import weatherRouter from "./api/weather";
 import { invoiceRouter } from "./api/invoice";
 import { initInvoiceScheduler } from "./jobs/invoice-scheduler";
+import { initEnergySyncJob } from "./jobs/energy-sync-job";
+import { initAnomalyDetectionJob } from "./jobs/anomaly-detection-job";
 
 import { handleStripeWebhook } from "./application/payment";
 import paymentRouter from "./api/payment";
+
+
+import { clerkMiddleware } from "@clerk/express";
 
 const server = express();
 
 server.use(cors({ origin: "http://localhost:5173" }));
 server.use(loggerMiddleware);
+server.use(clerkMiddleware());
 
 server.use("/api/webhooks", webhooksRouter);
 
@@ -37,10 +43,13 @@ server.use("/api/users", usersRouter);
 server.use("/api/weather", weatherRouter);
 server.use("/api/invoices", invoiceRouter);
 server.use("/api/payments", paymentRouter);
+
 server.use(globalErrorHandler);
 
 // Initialize automated jobs
 initInvoiceScheduler();
+initEnergySyncJob();
+initAnomalyDetectionJob();
 
 connectDB();
 
