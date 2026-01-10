@@ -12,12 +12,22 @@ import weatherRouter from "./api/weather";
 import { invoiceRouter } from "./api/invoice";
 import { initInvoiceScheduler } from "./jobs/invoice-scheduler";
 
+import { handleStripeWebhook } from "./application/payment";
+import paymentRouter from "./api/payment";
+
 const server = express();
 
 server.use(cors({ origin: "http://localhost:5173" }));
 server.use(loggerMiddleware);
 
 server.use("/api/webhooks", webhooksRouter);
+
+// MUST be before express.json()
+server.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
 
 server.use(express.json());
 
@@ -26,6 +36,7 @@ server.use("/api/energy-generation-records", energyGenerationRecordRouter);
 server.use("/api/users", usersRouter);
 server.use("/api/weather", weatherRouter);
 server.use("/api/invoices", invoiceRouter);
+server.use("/api/payments", paymentRouter);
 server.use(globalErrorHandler);
 
 // Initialize automated jobs

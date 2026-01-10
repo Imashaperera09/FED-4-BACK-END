@@ -34,6 +34,9 @@ const InvoiceSchema = new mongoose.Schema({
     stripePaymentIntentId: {
         type: String,
     },
+    paidAt: {
+        type: Date,
+    },
     createdAt: {
         type: Date,
         default: Date.now,
