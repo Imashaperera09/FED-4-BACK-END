@@ -4,6 +4,8 @@ import { Invoice } from "../infrastructure/entities/Invoice";
 import { SolarUnit } from "../infrastructure/entities/SolarUnit";
 import { EnergyGenerationRecord } from "../infrastructure/entities/EnergyGenerationRecord";
 import { NotFoundError } from "../domain/errors/errors";
+import { User } from "../infrastructure/entities/User";
+import { generateInvoicesForAllUnits } from "../jobs/invoice-scheduler";
 
 const router = express.Router();
 
@@ -52,8 +54,14 @@ router.post("/generate", async (req, res, next) => {
         const ratePerKwh = 0.15;
         const amount = totalEnergy * ratePerKwh;
 
+        // Fetch user to get Clerk ID
+        const user = await User.findById(solarUnit.userId);
+        if (!user) {
+            throw new NotFoundError("User not found");
+        }
+
         const invoice = await Invoice.create({
-            userId: solarUnit.userId, // Assuming SolarUnit has userId, or fetch from User
+            userId: user.clerkUserId,
             solarUnitId,
             amount: parseFloat(amount.toFixed(2)),
             energyGenerated: parseFloat(totalEnergy.toFixed(2)),
@@ -63,6 +71,27 @@ router.post("/generate", async (req, res, next) => {
         });
 
         res.status(201).json(invoice);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// POST /api/invoices/auto-generate - Manually trigger auto-generation for all eligible units
+router.post("/auto-generate", async (req, res, next) => {
+    try {
+        console.log("Manual auto-generation triggered...");
+        const results = await generateInvoicesForAllUnits();
+
+        res.status(200).json({
+            message: `Auto-generation completed. Generated ${results.invoicesGenerated} invoices.`,
+            results: {
+                totalUnits: results.totalUnits,
+                invoicesGenerated: results.invoicesGenerated,
+                successCount: results.successCount,
+                errorCount: results.errorCount,
+                errors: results.errors,
+            },
+        });
     } catch (error) {
         next(error);
     }
