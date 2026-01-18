@@ -23,7 +23,10 @@ import { clerkMiddleware } from "@clerk/express";
 
 const server = express();
 
-server.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:5173" }));
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+const allowedOrigins = [frontendUrl, frontendUrl.endsWith('/') ? frontendUrl.slice(0, -1) : frontendUrl + '/'];
+
+server.use(cors({ origin: allowedOrigins }));
 server.use(loggerMiddleware);
 server.use(clerkMiddleware());
 
