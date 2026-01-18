@@ -8,7 +8,7 @@
     "dev:ngrok": "ngrok start api --config=ngrok.yml",
     "seed": "tsx src/infrastructure/seed.ts",
     "build": "npm install && tsc",
-    "start": "node --loader tsx src/index.ts"
+    "start": "node --import tsx src/index.ts"
   },
   "author": "",
   "license": "ISC",
