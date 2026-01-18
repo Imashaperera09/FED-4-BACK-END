@@ -36,8 +36,10 @@ anomalyRouter.get("/user", async (req: Request, res: Response, next: NextFunctio
     try {
         const auth = getAuth(req);
         const clerkUserId = auth.userId;
+        console.log("Anomaly User Route - Clerk User ID from Auth:", clerkUserId);
 
         const user = await User.findOne({ clerkUserId });
+        console.log("Anomaly User Route - User found in DB:", user);
         if (!user) throw new NotFoundError("User not found");
 
         const solarUnits = await SolarUnit.find({ userId: user._id });
