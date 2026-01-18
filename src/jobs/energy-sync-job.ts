@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { SolarUnit } from "../infrastructure/entities/SolarUnit";
 import { EnergyGenerationRecord } from "../infrastructure/entities/EnergyGenerationRecord";
 
-const DATA_API_URL = "http://localhost:8001/api";
+const DATA_API_URL = process.env.DATA_API_URL || "http://localhost:8001/api";
 
 export const initEnergySyncJob = () => {
     // Run every 2 hours (same as Data-api generation)
