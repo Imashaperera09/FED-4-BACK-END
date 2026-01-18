@@ -14,5 +14,5 @@ export const globalErrorHandler = (err, req, res, next) => {
         return res.status(401).json({ message: err.message });
     }
     // Handle other errors
-    res.status(500).json({ message: "Internal server error", error: err.message });
+    return res.status(500).json({ message: "Internal server error", error: err.message });
 };

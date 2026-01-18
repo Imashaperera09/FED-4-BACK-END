@@ -10,7 +10,8 @@ export const getAllEnergyGenerationRecordsBySolarUnitId = async (req, res, next)
             const energyGenerationRecords = await EnergyGenerationRecord.find({
                 solarUnitId: id,
             }).sort({ timestamp: -1 });
-            return res.status(200).json(energyGenerationRecords);
+            res.status(200).json(energyGenerationRecords);
+            return;
         }
         if (groupBy === "date") {
             const energyGenerationRecords = await EnergyGenerationRecord.aggregate([
@@ -36,6 +37,7 @@ export const getAllEnergyGenerationRecordsBySolarUnitId = async (req, res, next)
             res
                 .status(200)
                 .json(energyGenerationRecords.slice(0, parseInt(req.query.limit) || energyGenerationRecords.length));
+            return;
         }
     }
     catch (error) {
