@@ -13,6 +13,7 @@ export const UpdateSolarUnitDto = z.object({
   capacity: z.number(),
   status: z.enum(["ACTIVE", "INACTIVE", "MAINTENANCE"]),
   userId: z.string().nullable().optional(),
+  userEmail: z.string().email().nullable().optional(),
 });
 
 export const GetAllEnergyGenerationRecordsQueryDto = z.object({

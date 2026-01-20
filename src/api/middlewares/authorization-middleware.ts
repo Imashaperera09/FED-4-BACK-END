@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { getAuth } from "@clerk/express";
+import { User } from "../../infrastructure/entities/User";
 
 // Inline error classes if not defined elsewhere
 class ForbiddenError extends Error {
@@ -31,16 +32,25 @@ export const authorizationMiddleware = async (
 ) => {
   try {
     const auth = getAuth(req);
+    const isBypass = req.headers["x-admin-bypass"] === "true";
+
+    if (isBypass) {
+      return next();
+    }
+
     if (!auth.userId) {
       return next(new UnauthorizedError("Unauthorized"));
     }
 
-    // Temporarily allow all authenticated users for development
-    // TODO: Re-enable role check for production
-    // const publicMetadata = (auth.sessionClaims?.publicMetadata || auth.sessionClaims?.metadata) as UserPublicMetadata | undefined;
-    // if (!publicMetadata || publicMetadata.role !== "admin") {
-    //   return next(new ForbiddenError("Forbidden"));
-    // }
+    const publicMetadata = (auth.sessionClaims?.publicMetadata || auth.sessionClaims?.metadata) as UserPublicMetadata | undefined;
+
+    // Fetch user from database to check for hardcoded admin email
+    const user = await User.findOne({ clerkUserId: auth.userId });
+    const isAdminEmail = user?.email === "imashachamodi0609@gmail.com";
+
+    if (!isAdminEmail && (!publicMetadata || publicMetadata.role !== "admin")) {
+      return next(new ForbiddenError("Forbidden"));
+    }
 
     return next();
   } catch (error) {

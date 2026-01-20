@@ -60,7 +60,7 @@ export const getSolarUnitById = async (
 ) => {
   try {
     const { id } = req.params;
-    const solarUnit = await SolarUnit.findById(id);
+    const solarUnit = await SolarUnit.findById(id).populate("userId");
 
     if (!solarUnit) {
       throw new NotFoundError("Solar unit not found");
@@ -111,12 +111,35 @@ export const updateSolarUnit = async (
 ) => {
   try {
     const { id } = req.params;
-    const { serialNumber, installationDate, capacity, status, userId } = req.body;
+    const { serialNumber, installationDate, capacity, status, userId, userEmail } = req.body;
     const solarUnit = await SolarUnit.findById(id);
 
     if (!solarUnit) {
       throw new NotFoundError("Solar unit not found");
     }
+
+    console.log("Update Solar Unit Request Body:", req.body);
+    let finalUserId = userId;
+
+    if (userEmail) {
+      console.log("Searching for user with email:", userEmail);
+      let user = await User.findOne({ email: userEmail.toLowerCase() });
+      if (!user) {
+        console.log("Creating placeholder user for email:", userEmail);
+        // Create placeholder user
+        user = await User.create({
+          email: userEmail.toLowerCase(),
+          firstName: "New",
+          lastName: "User",
+        });
+      }
+      finalUserId = user._id;
+    }
+
+    console.log("Final User ID for update:", finalUserId);
+
+    const beforeUpdate = await SolarUnit.findById(id);
+    console.log("Solar Unit BEFORE update:", beforeUpdate);
 
     const updatedSolarUnit = await SolarUnit.findByIdAndUpdate(
       id,
@@ -125,10 +148,15 @@ export const updateSolarUnit = async (
         installationDate: new Date(installationDate),
         capacity,
         status,
-        userId: userId || null,
+        userId: finalUserId === "none" ? null : (finalUserId || null),
       },
       { new: true }
     );
+
+    console.log("Updated Solar Unit Result:", updatedSolarUnit);
+
+    const afterUpdate = await SolarUnit.findById(id);
+    console.log("Solar Unit AFTER update (fresh fetch):", afterUpdate);
 
     res.status(200).json(updatedSolarUnit);
   } catch (error) {
