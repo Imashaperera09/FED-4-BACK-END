@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CreateSolarUnitDto, UpdateSolarUnitDto } from "../domain/dtos/solar-unit";
 import { SolarUnit } from "../infrastructure/entities/SolarUnit";
 import { NextFunction, Request, Response } from "express";
-import { NotFoundError, ValidationError } from "../domain/errors/errors";
+import { NotFoundError, ValidationError, UnauthorizedError } from "../domain/errors/errors";
 import { User } from "../infrastructure/entities/User";
 import { getAuth, clerkClient } from "@clerk/express";
 
