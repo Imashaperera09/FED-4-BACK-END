@@ -24,7 +24,9 @@ anomalyRouter.get("/", async (req: Request, res: Response, next: NextFunction) =
                     model: 'User'
                 }
             })
-            .sort({ timestamp: -1 });
+            .sort({ timestamp: -1 })
+            .limit(1000)
+            .lean();
         res.status(200).json(anomalies);
     } catch (error) {
         next(error);

@@ -24,18 +24,34 @@ webhooksRouter.post(
       );
 
       if (eventType === "user.created") {
-        const { id } = evt.data;
-        const user = await User.findOne({ clerkUserId: id });
+        const { id, email_addresses, first_name, last_name } = evt.data;
+        const email = email_addresses[0].email_address;
+
+        // 1. Check if user already exists by clerkUserId
+        let user = await User.findOne({ clerkUserId: id });
         if (user) {
-          console.log("User already exists");
+          console.log("User already exists by Clerk ID");
           return res.send("User already exists");
         }
-        await User.create({
-          firstName: evt.data.first_name,
-          lastName: evt.data.last_name,
-          email: evt.data.email_addresses[0].email_address,
-          clerkUserId: id,
-        });
+
+        // 2. Check if a placeholder user exists by email (created by admin)
+        user = await User.findOne({ email: email.toLowerCase() });
+        if (user) {
+          console.log("Linking Clerk ID to existing placeholder user:", email);
+          user.clerkUserId = id;
+          if (!user.firstName) user.firstName = first_name;
+          if (!user.lastName) user.lastName = last_name;
+          await user.save();
+        } else {
+          // 3. Create new user if no placeholder exists
+          console.log("Creating new user:", email);
+          await User.create({
+            firstName: first_name,
+            lastName: last_name,
+            email: email.toLowerCase(),
+            clerkUserId: id,
+          });
+        }
       }
 
       if (eventType === "user.updated") {

@@ -4,7 +4,7 @@ import { SolarUnit } from "../infrastructure/entities/SolarUnit";
 import { NextFunction, Request, Response } from "express";
 import { NotFoundError, ValidationError } from "../domain/errors/errors";
 import { User } from "../infrastructure/entities/User";
-import { getAuth } from "@clerk/express";
+import { getAuth, clerkClient } from "@clerk/express";
 
 export const getAllSolarUnits = async (
   req: Request,
@@ -80,13 +80,42 @@ export const getSolarUnitForUser = async (
     const auth = getAuth(req);
     const clerkUserId = auth.userId;
 
-    const user = await User.findOne({ clerkUserId });
+    if (!clerkUserId) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    // 1. Try to find user by clerkUserId
+    let user = await User.findOne({ clerkUserId });
+
+    // 2. If not found, try to sync by email (in case webhook hasn't run)
     if (!user) {
-      throw new NotFoundError("User not found");
+      console.log("User not found by Clerk ID, attempting to sync by email...");
+
+      let email = (auth.sessionClaims as any)?.email;
+
+      if (!email) {
+        // Fetch from Clerk API if not in claims
+        const clerkUser = await clerkClient.users.getUser(clerkUserId);
+        email = clerkUser.emailAddresses[0]?.emailAddress;
+      }
+
+      if (email) {
+        user = await User.findOne({ email: email.toLowerCase() });
+        if (user) {
+          console.log("Linking Clerk ID to existing placeholder user via API:", email);
+          user.clerkUserId = clerkUserId;
+          await user.save();
+        }
+      }
+    }
+
+    if (!user) {
+      // If still no user, it means no unit is assigned yet
+      return res.status(200).json(null);
     }
 
     const solarUnits = await SolarUnit.find({ userId: user._id });
-    res.status(200).json(solarUnits[0]);
+    res.status(200).json(solarUnits[0] || null);
   } catch (error) {
     next(error);
   }
